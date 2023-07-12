@@ -56,7 +56,6 @@
                 <artifactId>jboss-marshalling-river</artifactId>
                 <version>${jboss-marshalling-river.version}</version>
             </dependency>
-
             <!--序列化 处理工具-->
             <dependency>
                 <groupId>org.jboss.marshalling</groupId>
