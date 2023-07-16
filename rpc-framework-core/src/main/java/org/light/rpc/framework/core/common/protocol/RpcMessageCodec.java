@@ -45,9 +45,10 @@ public class RpcMessageCodec extends MessageToMessageCodec<ByteBuf, AbstractMess
         if (magicNum != AbstractMessage.MAGIC_NUM) {
             return;
         }
+        final int messageType = byteBuf.readInt();
         final int length = byteBuf.readInt();
         byte[] bytes = new byte[length];
-        byteBuf.readBytes(byteBuf, 0, length);
+        byteBuf.readBytes(bytes, 0, length);
         final ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(bytes);
         final ObjectInputStream objectInputStream = new ObjectInputStream(arrayInputStream);
         final AbstractMessage abstractMessage = (AbstractMessage) objectInputStream.readObject();

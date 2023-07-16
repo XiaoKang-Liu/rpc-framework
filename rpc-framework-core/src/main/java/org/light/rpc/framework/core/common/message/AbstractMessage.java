@@ -1,5 +1,6 @@
 package org.light.rpc.framework.core.common.message;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import java.util.Map;
  * @author lxk
  * @date 2023/7/13 11:28
  */
-public abstract class AbstractMessage {
+public abstract class AbstractMessage implements Serializable {
 
     private static final Map<Integer, Class<? extends AbstractMessage>> MESSAGE_CLASSES = new HashMap<>();
 

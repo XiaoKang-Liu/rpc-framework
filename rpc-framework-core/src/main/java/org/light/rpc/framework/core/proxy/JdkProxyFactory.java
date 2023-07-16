@@ -9,7 +9,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author lxk
@@ -36,7 +35,7 @@ public class JdkProxyFactory {
                         final DefaultPromise<Object> promise = new DefaultPromise<>(channel.eventLoop());
                         CommonClientCache.RESP_MAP.put(sequenceId, promise);
                         // 超时 3 秒
-                        promise.await(3, TimeUnit.SECONDS);
+                        promise.await(3000);
                         if (promise.isSuccess()) {
                             return promise.getNow();
                         } else {

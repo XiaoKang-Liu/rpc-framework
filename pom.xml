@@ -16,7 +16,13 @@
     <description>轻量级的rpc框架</description>
 
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+        <java.version>1.8</java.version>
         <netty.version>4.1.6.Final</netty.version>
+        <lombok.version>1.18.26</lombok.version>
+        <logback.version>1.2.3</logback.version>
         <fastjson.version>1.2.29</fastjson.version>
         <jboss-marshalling-river.version>1.4.11.Final</jboss-marshalling-river.version>
         <jboss-marshalling-serial.version>1.4.11.Final</jboss-marshalling-serial.version>
@@ -39,9 +45,15 @@
             </dependency>
 
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
             </dependency>
 
             <dependency>
