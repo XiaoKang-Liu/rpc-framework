@@ -1,7 +1,5 @@
 package org.light.rpc.framework.core.registry;
 
-import java.net.URL;
-
 /**
  * 注册相关接口
  * @author lxk
