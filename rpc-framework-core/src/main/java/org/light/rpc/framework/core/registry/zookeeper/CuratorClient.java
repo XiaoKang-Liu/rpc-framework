@@ -4,8 +4,13 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.data.Stat;
+
+import java.util.List;
 
 /**
+ * 节点操作
  * @author lxk
  * @date 2023/07/24 22:45
  **/
@@ -60,6 +65,14 @@ public class CuratorClient {
         }
     }
 
+    public List<String> getChildrenData(String path) {
+        try {
+            return client.getChildren().forPath(path);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * 创建持久节点
      * @param path  节点路径
@@ -80,7 +93,7 @@ public class CuratorClient {
      */
     public void creatPersistentSeqNode(String path, String data) {
         try {
-            client.create().creatingParentContainersIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(path, data.getBytes());
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(path, data.getBytes());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -107,6 +120,58 @@ public class CuratorClient {
     public void creatEphemeralSeqNode(String path, String data) {
         try {
             client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(path, data.getBytes());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 断开连接
+     */
+    public void disconnect() {
+        client.close();
+    }
+
+    /**
+     * 删除节点
+     * @param path   节点路径
+     * @return       结果
+     */
+    public boolean deleteNode(String path) {
+        try {
+            client.delete().forPath(path);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 判断节点是否存在
+     * @param path  节点路径
+     * @return      结果
+     */
+    public boolean existNode(String path) {
+        final Stat stat;
+        try {
+            stat = client.checkExists().forPath(path);
+            return stat != null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void watchNodeData(String path, Watcher watcher) {
+        try {
+            client.getData().usingWatcher(watcher).forPath(path);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void watchChildNodeData(String path, Watcher watcher) {
+        try {
+            client.getChildren().usingWatcher(watcher).forPath(path);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
