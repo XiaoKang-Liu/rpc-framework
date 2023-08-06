@@ -2,9 +2,9 @@ package org.light.rpc.framework.core.registry.zookeeper;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.Stat;
 
 import java.util.List;
@@ -161,17 +161,26 @@ public class CuratorClient {
         }
     }
 
-    public void watchNodeData(String path, Watcher watcher) {
+    /**
+     * 监听指定节点
+     * @param path    节点路径
+     * @param listener
+     */
+    public void watchNodeData(String path, NodeCacheListener listener) {
         try {
-            client.getData().usingWatcher(watcher).forPath(path);
+            NodeCache nodeCache = new NodeCache(client, path);
+            nodeCache.getListenable().addListener(listener);
+            nodeCache.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void watchChildNodeData(String path, Watcher watcher) {
+    public void watchChildNodeData(String path, PathChildrenCacheListener listener) {
         try {
-            client.getChildren().usingWatcher(watcher).forPath(path);
+            PathChildrenCache pathChildrenCache = new PathChildrenCache(client, path, true);
+            pathChildrenCache.getListenable().addListener(listener);
+            pathChildrenCache.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
