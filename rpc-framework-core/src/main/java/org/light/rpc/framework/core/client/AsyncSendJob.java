@@ -13,18 +13,13 @@ import org.light.rpc.framework.core.common.message.RpcRequestMessage;
 @Slf4j
 public class AsyncSendJob implements Runnable {
 
-    private final ChannelFuture channelFuture;
-
-    public AsyncSendJob(ChannelFuture channelFuture) {
-        this.channelFuture = channelFuture;
-    }
-
     @Override
     public void run() {
         while (true) {
             // 阻塞
             try {
                 final RpcRequestMessage requestMessage = CommonClientCache.SEND_QUEUE.take();
+                final ChannelFuture channelFuture = ConnectionHandler.getChannelFuture(requestMessage.getTargetServiceName());
                 channelFuture.channel().writeAndFlush(requestMessage)
                         // 不加监听的话消息发送异常不会打印错误信息
                         .addListener(promise -> {

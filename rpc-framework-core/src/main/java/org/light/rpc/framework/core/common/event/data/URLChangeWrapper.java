@@ -10,7 +10,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 @Data
 public class URLChangeWrapper {
 
-    private String serviceName;
+    private String path;
 
     private PathChildrenCacheEvent.Type type;
 }

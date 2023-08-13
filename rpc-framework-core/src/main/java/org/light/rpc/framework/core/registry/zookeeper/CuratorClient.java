@@ -19,7 +19,7 @@ public class CuratorClient {
     private CuratorFramework client;
 
     public CuratorClient(String zkAddress) {
-        this(zkAddress, 3000, 1);
+        this(zkAddress, 6000, 2);
     }
 
     public CuratorClient(String zkAddress, int baseSleepTimes, int maxRetryTimes) {
@@ -178,7 +178,7 @@ public class CuratorClient {
 
     public void watchChildNodeData(String path, PathChildrenCacheListener listener) {
         try {
-            PathChildrenCache pathChildrenCache = new PathChildrenCache(client, path, true);
+            PathChildrenCache pathChildrenCache = new PathChildrenCache(client, path, false);
             pathChildrenCache.getListenable().addListener(listener);
             pathChildrenCache.start();
         } catch (Exception e) {

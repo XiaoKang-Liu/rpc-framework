@@ -9,11 +9,18 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.light.rpc.framework.core.common.cache.CommonClientCache;
 import org.light.rpc.framework.core.common.config.ClientConfig;
+import org.light.rpc.framework.core.common.event.RpcListenerLoader;
 import org.light.rpc.framework.core.common.handler.RpcResponseMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
 import org.light.rpc.framework.core.proxy.JdkProxyFactory;
+import org.light.rpc.framework.core.registry.URL;
+import org.light.rpc.framework.core.registry.zookeeper.AbstractRegister;
+import org.light.rpc.framework.core.registry.zookeeper.ZookeeperRegister;
 import org.light.rpc.framework.core.server.UserService;
+
+import java.util.List;
 
 /**
  * @author lxk
@@ -24,6 +31,10 @@ public class Client {
 
     private ClientConfig clientConfig;
 
+    private AbstractRegister abstractRegister;
+
+    private RpcListenerLoader rpcListenerLoader;
+
     public ClientConfig getClientConfig() {
         return clientConfig;
     }
@@ -32,7 +43,7 @@ public class Client {
         this.clientConfig = clientConfig;
     }
 
-    public Channel startClientApplication() throws InterruptedException {
+    public Bootstrap initClientApplication() throws InterruptedException {
         final NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         final Bootstrap bootstrap = new Bootstrap();
         final RpcMessageCodec rpcMessageCodec = new RpcMessageCodec();
@@ -47,15 +58,43 @@ public class Client {
                         nioSocketChannel.pipeline().addLast(rpcResponseMessageHandler);
                     }
                 });
-        final ChannelFuture channelFuture = bootstrap.connect(clientConfig.getServerAddress(), clientConfig.getPort()).sync();
-        log.info("==============服务启动===============");
-        startClient(channelFuture);
-        return channelFuture.channel();
+        // 加载监听器器
+        rpcListenerLoader = new RpcListenerLoader();
+        rpcListenerLoader.init();
+        return bootstrap;
     }
 
-    private void startClient(ChannelFuture channelFuture) {
-        final Thread thread = new Thread(new AsyncSendJob(channelFuture), "sendThead");
+    private void startClient() {
+        final Thread thread = new Thread(new AsyncSendJob(), "sendThead");
         thread.start();
+    }
+
+    public void doSubscribeService(Class serviceBean) {
+        if (abstractRegister == null) {
+            abstractRegister = new ZookeeperRegister("120.25.155.123:2181");
+        }
+        URL url = new URL();
+        url.setApplicationName("consumer1");
+        url.setServiceName(serviceBean.getName());
+        url.addParameter("host", "localhost");
+        abstractRegister.subscribe(url);
+    }
+
+    public void doConnectServer() {
+        for (String providerServiceName : CommonClientCache.SUBSCRIBE_SERVICE_LIST) {
+            final List<String> providerIps = abstractRegister.getProviderIps(providerServiceName);
+            for (String providerIp : providerIps) {
+                try {
+                    ConnectionHandler.connect(providerServiceName, providerIp);
+                } catch (InterruptedException e) {
+                    log.error("[doConnectServer] connect fail ", e);
+                }
+            }
+            URL url = new URL();
+            url.setServiceName(providerServiceName);
+            //客户端在此新增一个订阅的功能
+            abstractRegister.doAfterSubscribe(url);
+        }
     }
 
     public static void main(String[] args) throws InterruptedException {
@@ -64,9 +103,14 @@ public class Client {
         clientConfig.setServerAddress("localhost");
         clientConfig.setPort(8080);
         client.setClientConfig(clientConfig);
-        final Channel channel = client.startClientApplication();
-        final UserService proxy = JdkProxyFactory.getProxy(channel, UserService.class);
+        final Bootstrap bootstrap = client.initClientApplication();
+        ConnectionHandler.setBootstrap(bootstrap);
+        final UserService proxy = JdkProxyFactory.getProxy(UserService.class);
+        client.doSubscribeService(UserService.class);
+        client.doConnectServer();
+        client.startClient();
         final String hello = proxy.hello();
         System.out.println(hello);
+        System.out.println(".......");
     }
 }

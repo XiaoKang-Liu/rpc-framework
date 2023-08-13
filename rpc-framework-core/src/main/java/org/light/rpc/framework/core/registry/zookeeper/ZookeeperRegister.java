@@ -52,7 +52,8 @@ public class ZookeeperRegister extends AbstractRegister {
      * @param serviceName
      * @return
      */
-    private List<String> getProviderIps(String serviceName) {
+    @Override
+    public List<String> getProviderIps(String serviceName) {
         return zkClient.getChildrenData(ROOT + "/" + serviceName + "/provider");
     }
 
@@ -118,10 +119,11 @@ public class ZookeeperRegister extends AbstractRegister {
             @Override
             public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent event) throws Exception {
                 String path = event.getData().getPath();
+                log.info("path {} {}", path, event.getType().toString());
                 // 包装事件元数据
                 URLChangeWrapper urlChangeWrapper = new URLChangeWrapper();
                 urlChangeWrapper.setType(event.getType());
-                urlChangeWrapper.setServiceName(path.split("/")[2]);
+                urlChangeWrapper.setPath(path);
                 // 事件
                 RpcEvent rpcEvent = new RpcUpdateEvent(urlChangeWrapper);
                 // 监听

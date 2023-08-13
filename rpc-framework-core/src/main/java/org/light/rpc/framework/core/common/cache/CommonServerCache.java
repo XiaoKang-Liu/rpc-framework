@@ -14,7 +14,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CommonServerCache {
 
-    public static final Map<String, Object> PROVIDER_CLASS_MAP = new ConcurrentHashMap<String, Object>();
+    private CommonServerCache() {}
 
+    /**
+     * key   接口全限定类名
+     * value 接口对应实现类
+     */
+    public static final Map<String, Object> PROVIDER_CLASS_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 服务中所有注册到 zookeeper 的接口的 URL
+     */
     public static final Set<URL> PROVIDER_URL_SET = new HashSet<>();
 }

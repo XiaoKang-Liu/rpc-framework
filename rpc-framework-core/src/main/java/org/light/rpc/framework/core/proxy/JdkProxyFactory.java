@@ -1,6 +1,7 @@
 package org.light.rpc.framework.core.proxy;
 
 import io.netty.channel.Channel;
+import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
 import org.light.rpc.framework.core.common.message.RpcRequestMessage;
@@ -16,7 +17,7 @@ import java.util.UUID;
  */
 public class JdkProxyFactory {
 
-    public static  <T> T getProxy(Channel channel, Class<T> serviceClass) {
+    public static  <T> T getProxy(Class<T> serviceClass) {
         final Object proxyInstance = Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class[]{serviceClass},
                 new InvocationHandler() {
                     @Override
@@ -32,7 +33,7 @@ public class JdkProxyFactory {
                         // 消息放入到发送队列中
                         CommonClientCache.SEND_QUEUE.add(rpcRequestMessage);
                         // 使用 promise 接收结果
-                        final DefaultPromise<Object> promise = new DefaultPromise<>(channel.eventLoop());
+                        final DefaultPromise<Object> promise = new DefaultPromise<>(new DefaultEventLoop());
                         CommonClientCache.RESP_MAP.put(sequenceId, promise);
                         // 超时 3 秒
                         promise.await(3000);

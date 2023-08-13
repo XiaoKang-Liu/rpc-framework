@@ -11,6 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.light.rpc.framework.core.common.cache.CommonServerCache;
 import org.light.rpc.framework.core.common.handler.RpcRequestMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
+import org.light.rpc.framework.core.registry.RegistryService;
+import org.light.rpc.framework.core.registry.URL;
+import org.light.rpc.framework.core.registry.zookeeper.ZookeeperRegister;
+
+import java.net.InetSocketAddress;
 
 /**
  * @author lxk
@@ -19,7 +24,9 @@ import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
 @Slf4j
 public class Server {
 
-    public static void startApplication() throws InterruptedException {
+    private RegistryService registryService;
+
+    public void startApplication() throws InterruptedException {
         final NioEventLoopGroup boss = new NioEventLoopGroup(1);
         final NioEventLoopGroup worker = new NioEventLoopGroup();
         final ServerBootstrap bootstrap = new ServerBootstrap();
@@ -35,10 +42,10 @@ public class Server {
                 nioSocketChannel.pipeline().addLast(rpcRequestMessageHandler);
             }
         });
-        bootstrap.bind(8080).sync();
+        bootstrap.bind(8084).sync();
     }
     
-    public static void registerService(Object serviceBean) {
+    public void registerService(Object serviceBean) {
         final Class<?>[] interfaces = serviceBean.getClass().getInterfaces();
         if (interfaces.length == 0) {
             throw new RuntimeException("service must have interfaces!");
@@ -46,12 +53,23 @@ public class Server {
         if (interfaces.length > 1) {
             throw new RuntimeException("service must only have one interface!");
         }
+        if (registryService == null) {
+            registryService = new ZookeeperRegister("120.25.155.123:2181");
+        }
+
         final Class<?> interfaceClass = interfaces[0];
         CommonServerCache.PROVIDER_CLASS_MAP.put(interfaceClass.getName(), serviceBean);
+        final URL url = new URL();
+        url.setServiceName(interfaceClass.getName());
+        url.setApplicationName("provider1");
+        url.addParameter("host", "localhost");
+        url.addParameter("port", "8084");
+        registryService.registry(url);
     }
 
     public static void main(String[] args) throws InterruptedException {
-        startApplication();
-        registerService(new UserServiceImpl());
+        Server server = new Server();
+        server.registerService(new UserServiceImpl());
+        server.startApplication();
     }
 }
