@@ -29,6 +29,7 @@
         <slf4j-api.version>1.7.13</slf4j-api.version>
         <javassist.version>3.21.0-GA</javassist.version>
         <curator.version>2.12.0</curator.version>
+        <kryo.version>3.0.3</kryo.version>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +75,12 @@
                 <groupId>org.jboss.marshalling</groupId>
                 <artifactId>jboss-marshalling-serial</artifactId>
                 <version>${jboss-marshalling-serial.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo-shaded</artifactId>
+                <version>${kryo.version}</version>
             </dependency>
 
             <dependency>

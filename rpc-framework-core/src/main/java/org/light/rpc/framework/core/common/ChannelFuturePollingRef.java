@@ -11,9 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ChannelFuturePollingRef {
 
-    private ChannelFuturePollingRef() {
-
-    }
+    private ChannelFuturePollingRef() {}
 
     private static final AtomicInteger REFERENCE_TIMES = new AtomicInteger(0);
 
