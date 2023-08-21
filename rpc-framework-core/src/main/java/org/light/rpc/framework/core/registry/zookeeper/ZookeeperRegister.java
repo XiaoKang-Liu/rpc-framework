@@ -34,7 +34,7 @@ public class ZookeeperRegister extends AbstractRegister {
      */
     private String getProviderPath(URL url) {
         return ROOT + "/" + url.getServiceName() + "/provider/" +
-                url.getParameters().get("host") + ":" + url.getParameters().get("port");
+                url.getParameters().get("ip") + ":" + url.getParameters().get("port");
     }
 
     /**
@@ -44,7 +44,7 @@ public class ZookeeperRegister extends AbstractRegister {
      */
     private String getConsumerPath(URL url) {
         return ROOT + "/" + url.getServiceName() + "/consumer/" + url.getApplicationName() + ":" +
-                url.getParameters().get("host") + ":" + url.getParameters().get("port");
+                url.getParameters().get("ip") + ":" + url.getParameters().get("port");
     }
 
     /**
@@ -53,7 +53,7 @@ public class ZookeeperRegister extends AbstractRegister {
      * @return
      */
     @Override
-    public List<String> getProviderIps(String serviceName) {
+    public List<String> getProviderAddrs(String serviceName) {
         return zkClient.getChildrenData(ROOT + "/" + serviceName + "/provider");
     }
 

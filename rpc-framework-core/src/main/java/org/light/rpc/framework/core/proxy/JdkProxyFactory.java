@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
+import org.light.rpc.framework.core.common.exception.RpcException;
 import org.light.rpc.framework.core.common.message.RpcRequestMessage;
 
 import java.lang.reflect.InvocationHandler;
@@ -41,7 +42,7 @@ public class JdkProxyFactory {
                             return promise.getNow();
                         } else {
                             final Throwable cause = promise.cause();
-                            throw new RuntimeException(cause);
+                            throw new RpcException(cause);
                         }
                     }
                 });

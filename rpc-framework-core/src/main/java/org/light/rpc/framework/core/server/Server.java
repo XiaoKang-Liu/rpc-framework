@@ -9,13 +9,13 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.light.rpc.framework.core.common.cache.CommonServerCache;
+import org.light.rpc.framework.core.common.exception.RpcException;
 import org.light.rpc.framework.core.common.handler.RpcRequestMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
+import org.light.rpc.framework.core.common.util.RpcCommonUtil;
 import org.light.rpc.framework.core.registry.RegistryService;
 import org.light.rpc.framework.core.registry.URL;
 import org.light.rpc.framework.core.registry.zookeeper.ZookeeperRegister;
-
-import java.net.InetSocketAddress;
 
 /**
  * @author lxk
@@ -25,6 +25,8 @@ import java.net.InetSocketAddress;
 public class Server {
 
     private RegistryService registryService;
+
+    private String port = System.getProperty("server.port");
 
     public void startApplication() throws InterruptedException {
         final NioEventLoopGroup boss = new NioEventLoopGroup(1);
@@ -42,16 +44,16 @@ public class Server {
                 nioSocketChannel.pipeline().addLast(rpcRequestMessageHandler);
             }
         });
-        bootstrap.bind(8084).sync();
+        bootstrap.bind( Integer.parseInt(System.getProperty("server.port"))).sync();
     }
     
     public void registerService(Object serviceBean) {
         final Class<?>[] interfaces = serviceBean.getClass().getInterfaces();
         if (interfaces.length == 0) {
-            throw new RuntimeException("service must have interfaces!");
+            throw new RpcException("service must have interfaces!");
         }
         if (interfaces.length > 1) {
-            throw new RuntimeException("service must only have one interface!");
+            throw new RpcException("service must only have one interface!");
         }
         if (registryService == null) {
             registryService = new ZookeeperRegister("120.25.155.123:2181");
@@ -62,8 +64,8 @@ public class Server {
         final URL url = new URL();
         url.setServiceName(interfaceClass.getName());
         url.setApplicationName("provider1");
-        url.addParameter("host", "localhost");
-        url.addParameter("port", "8084");
+        url.addParameter("ip", RpcCommonUtil.getLocalIpAddress());
+        url.addParameter("port", port);
         registryService.registry(url);
     }
 

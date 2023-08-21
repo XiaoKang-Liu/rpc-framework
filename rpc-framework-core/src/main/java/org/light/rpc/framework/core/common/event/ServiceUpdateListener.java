@@ -1,9 +1,11 @@
 package org.light.rpc.framework.core.common.event;
 
 import lombok.extern.slf4j.Slf4j;
+import org.light.rpc.framework.core.client.ConnectionHandler;
 import org.light.rpc.framework.core.common.ChannelFutureWrapper;
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
 import org.light.rpc.framework.core.common.event.data.URLChangeWrapper;
+import org.light.rpc.framework.core.common.exception.RpcException;
 
 import java.util.List;
 
@@ -26,17 +28,27 @@ public class ServiceUpdateListener implements RpcListener<RpcUpdateEvent> {
             return;
         }
         ChannelFutureWrapper channelFutureWrapper = new ChannelFutureWrapper();
-        String host = serviceName.split(":")[0];
-        Integer port = Integer.valueOf(serviceName.split(":")[1]);
+        final String providerUrl = wrapper.getPath().split("/")[4];
+        String ip = providerUrl.split(":")[0];
+        Integer port = Integer.valueOf(providerUrl.split(":")[1]);
+        channelFutureWrapper.setIp(ip);
         channelFutureWrapper.setPort(port);
-        channelFutureWrapper.setHost(host);
         switch (wrapper.getType()) {
             case CHILD_ADDED:
+                try {
+                    ConnectionHandler.doConnect(serviceName, ip, port);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RpcException("connect " + ip + ":" + port + " failed", e);
+                }
                 channelFutureWrappers.add(channelFutureWrapper);
                 break;
             case CHILD_REMOVED:
                 channelFutureWrappers.removeIf(future ->
-                        future.getPort().equals(port) && future.getHost().equals(host));
+                        future.getPort().equals(port) && future.getIp().equals(ip));
+                break;
+            case CHILD_UPDATED:
+                // 权重更新
                 break;
             default: break;
         }

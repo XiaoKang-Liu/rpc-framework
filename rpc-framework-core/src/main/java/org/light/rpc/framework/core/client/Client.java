@@ -1,8 +1,6 @@
 package org.light.rpc.framework.core.client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -14,6 +12,7 @@ import org.light.rpc.framework.core.common.config.ClientConfig;
 import org.light.rpc.framework.core.common.event.RpcListenerLoader;
 import org.light.rpc.framework.core.common.handler.RpcResponseMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
+import org.light.rpc.framework.core.common.util.RpcCommonUtil;
 import org.light.rpc.framework.core.proxy.JdkProxyFactory;
 import org.light.rpc.framework.core.registry.URL;
 import org.light.rpc.framework.core.registry.zookeeper.AbstractRegister;
@@ -76,17 +75,18 @@ public class Client {
         URL url = new URL();
         url.setApplicationName("consumer1");
         url.setServiceName(serviceBean.getName());
-        url.addParameter("host", "localhost");
+        url.addParameter("ip", RpcCommonUtil.getLocalIpAddress());
         abstractRegister.subscribe(url);
     }
 
     public void doConnectServer() {
         for (String providerServiceName : CommonClientCache.SUBSCRIBE_SERVICE_LIST) {
-            final List<String> providerIps = abstractRegister.getProviderIps(providerServiceName);
-            for (String providerIp : providerIps) {
+            final List<String> providerAddrs = abstractRegister.getProviderAddrs(providerServiceName);
+            for (String providerAddr : providerAddrs) {
                 try {
-                    ConnectionHandler.connect(providerServiceName, providerIp);
+                    ConnectionHandler.connect(providerServiceName, providerAddr);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     log.error("[doConnectServer] connect fail ", e);
                 }
             }
@@ -100,7 +100,7 @@ public class Client {
     public static void main(String[] args) throws InterruptedException {
         Client client = new Client();
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.setServerAddress("localhost");
+        clientConfig.setServerAddress(RpcCommonUtil.getLocalIpAddress());
         clientConfig.setPort(8080);
         client.setClientConfig(clientConfig);
         final Bootstrap bootstrap = client.initClientApplication();
@@ -111,6 +111,5 @@ public class Client {
         client.startClient();
         final String hello = proxy.hello();
         System.out.println(hello);
-        System.out.println(".......");
     }
 }

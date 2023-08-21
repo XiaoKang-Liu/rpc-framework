@@ -46,4 +46,7 @@ public class CommonClientCache {
      * 每次进行远程调用的时候都是从这里面去选择服务提供者
      */
     public static final Map<String, List<ChannelFutureWrapper>> CONNECT_MAP = new ConcurrentHashMap<>();
+
+
+    public static final Map<String, ChannelFutureWrapper[]> SERVICE_ROUTE_MAP = new ConcurrentHashMap<>();
 }

@@ -40,9 +40,9 @@ public class URL {
      * @return    providerNodeStr
      */
     public static String buildProviderUrlStr(URL url) {
-        String host = url.getParameters().get("host");
+        String ip = url.getParameters().get("ip");
         String port = url.getParameters().get("port");
-        return new String((url.getApplicationName() + ";" + url.getServiceName() + ";" + host + ":" + port + ";" + System.currentTimeMillis()).getBytes(), StandardCharsets.UTF_8);
+        return new String((url.getApplicationName() + ";" + url.getServiceName() + ";" + ip + ":" + port + ";" + System.currentTimeMillis()).getBytes(), StandardCharsets.UTF_8);
     }
 
     /**
@@ -51,8 +51,8 @@ public class URL {
      * @return    consumerNodeStr
      */
     public static String buildConsumerUrlStr(URL url) {
-        String host = url.getParameters().get("host");
-        return new String((url.getApplicationName() + ";" + url.getServiceName() + ";" + host + ";" + System.currentTimeMillis()).getBytes(), StandardCharsets.UTF_8);
+        String ip = url.getParameters().get("ip");
+        return new String((url.getApplicationName() + ";" + url.getServiceName() + ";" + ip + ";" + System.currentTimeMillis()).getBytes(), StandardCharsets.UTF_8);
     }
 
     /**

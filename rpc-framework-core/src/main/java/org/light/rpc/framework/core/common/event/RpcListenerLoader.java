@@ -12,14 +12,15 @@ import java.util.concurrent.Executors;
  * @author lxk
  * @date 2023/08/05 16:32
  **/
+@SuppressWarnings("rawtypes")
 public class RpcListenerLoader {
 
-    private static final List<RpcListener> rpcListenerList = new ArrayList<>();
+    private static final List<RpcListener> RPC_LISTENER_LIST = new ArrayList<>();
 
-    private static final ExecutorService eventThreadPool = Executors.newFixedThreadPool(2);
+    private static final ExecutorService EVENT_THREAD_POOL = Executors.newFixedThreadPool(2);
 
     public static void registerListener(RpcListener rpcListener) {
-        rpcListenerList.add(rpcListener);
+        RPC_LISTENER_LIST.add(rpcListener);
     }
 
     public void init() {
@@ -27,13 +28,13 @@ public class RpcListenerLoader {
     }
 
     public static void sendEvent(RpcEvent rpcEvent) {
-        if (rpcListenerList.isEmpty()) {
+        if (RPC_LISTENER_LIST.isEmpty()) {
             return;
         }
-        for (RpcListener rpcListener : rpcListenerList) {
+        for (RpcListener rpcListener : RPC_LISTENER_LIST) {
             Class<?> type = getInterfaceGeneric(rpcListener);
-            if (type != null && type.equals(RpcEvent.class)) {
-                eventThreadPool.execute(() -> rpcListener.callBack(rpcEvent.getData()));
+            if (type != null && RpcEvent.class.isAssignableFrom(type)) {
+                EVENT_THREAD_POOL.execute(() -> rpcListener.callBack(rpcEvent.getData()));
             }
         }
     }

@@ -12,7 +12,9 @@ public class ChannelFutureWrapper {
 
     private ChannelFuture channelFuture;
 
-    private String host;
+    private String ip;
 
     private Integer port;
+
+    private Integer weight;
 }

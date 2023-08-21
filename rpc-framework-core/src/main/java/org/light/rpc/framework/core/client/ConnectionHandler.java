@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFuture;
 import org.apache.commons.collections4.CollectionUtils;
 import org.light.rpc.framework.core.common.ChannelFutureWrapper;
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
+import org.light.rpc.framework.core.common.exception.RpcException;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -25,27 +26,30 @@ public class ConnectionHandler {
     /**
      * 构建单个连接通道和进行连接内存管理
      * @param providerServiceName
-     * @param providerIp
-     * @throws InterruptedException
+     * @param providerAddr
      */
-    public static void connect(String providerServiceName, String providerIp) throws InterruptedException {
+    public static void connect(String providerServiceName, String providerAddr) throws InterruptedException {
         if (bootstrap == null) {
-            throw new RuntimeException("bootstrap can not be null");
+            throw new RpcException("bootstrap can not be null");
         }
         // 校验格式
-        if(!providerIp.contains(":")){
+        if(!providerAddr.contains(":")){
             return;
         }
-        final String[] providerAddr = providerIp.split(":");
-        final String ip = providerAddr[0];
-        final int port = Integer.parseInt(providerAddr[1]);
+        final String[] addr = providerAddr.split(":");
+        final String ip = addr[0];
+        final int port = Integer.parseInt(addr[1]);
+        doConnect(providerServiceName, ip, port);
+    }
+
+    public static void doConnect(String providerServiceName, String ip, Integer port) throws InterruptedException {
         final ChannelFuture channelFuture = bootstrap.connect(new InetSocketAddress(ip, port)).sync();
         final ChannelFutureWrapper channelFutureWrapper = new ChannelFutureWrapper();
         channelFutureWrapper.setChannelFuture(channelFuture);
-        channelFutureWrapper.setHost(ip);
+        channelFutureWrapper.setIp(ip);
         channelFutureWrapper.setPort(port);
         // 加入本地缓存
-        CommonClientCache.SERVER_ADDRESS.add(providerIp);
+        CommonClientCache.SERVER_ADDRESS.add(ip + ":" + port);
         List<ChannelFutureWrapper> channelFutureWrappers = CommonClientCache.CONNECT_MAP.get(providerServiceName);
         if (CollectionUtils.isEmpty(channelFutureWrappers)) {
             channelFutureWrappers = new ArrayList<>();
@@ -58,11 +62,11 @@ public class ConnectionHandler {
         return bootstrap.connect(ip, port).sync();
     }
 
-    public static void disconnect(String providerServiceName, String providerIp) {
-        CommonClientCache.SERVER_ADDRESS.remove(providerIp);
+    public static void disconnect(String providerServiceName, String providerAddr) {
+        CommonClientCache.SERVER_ADDRESS.remove(providerAddr);
         List<ChannelFutureWrapper> channelFutureWrappers = CommonClientCache.CONNECT_MAP.get(providerServiceName);
         if (!channelFutureWrappers.isEmpty()) {
-            channelFutureWrappers.removeIf(futureWrapper -> providerIp.equals(futureWrapper.getHost() + ":" + futureWrapper.getPort()));
+            channelFutureWrappers.removeIf(futureWrapper -> providerAddr.equals(futureWrapper.getIp() + ":" + futureWrapper.getPort()));
         }
     }
 
@@ -74,7 +78,7 @@ public class ConnectionHandler {
     public static ChannelFuture getChannelFuture(String providerServiceName) {
         List<ChannelFutureWrapper> channelFutureWrappers = CommonClientCache.CONNECT_MAP.get(providerServiceName);
         if (channelFutureWrappers.isEmpty()) {
-            throw new RuntimeException("no provider exist for " +
+            throw new RpcException("no provider exist for " +
                     providerServiceName);
         }
         return channelFutureWrappers.get(new

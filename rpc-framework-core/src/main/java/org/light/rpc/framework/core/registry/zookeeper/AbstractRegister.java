@@ -37,5 +37,5 @@ public abstract class AbstractRegister implements RegistryService {
 
     public abstract void doBeforeSubscribe(URL url);
 
-    public abstract List<String> getProviderIps(String serviceName);
+    public abstract List<String> getProviderAddrs(String serviceName);
 }

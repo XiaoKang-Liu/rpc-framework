@@ -6,6 +6,7 @@ import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
+import org.light.rpc.framework.core.common.exception.RpcException;
 
 import java.util.List;
 
@@ -47,7 +48,7 @@ public class CuratorClient {
                 return new String(bytes);
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
         return null;
     }
@@ -61,7 +62,7 @@ public class CuratorClient {
         try {
             client.setData().forPath(path, data.getBytes());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -69,7 +70,7 @@ public class CuratorClient {
         try {
             return client.getChildren().forPath(path);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -82,7 +83,7 @@ public class CuratorClient {
         try {
             client.create().creatingParentsIfNeeded().forPath(path, data.getBytes());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -95,7 +96,7 @@ public class CuratorClient {
         try {
             client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT_SEQUENTIAL).forPath(path, data.getBytes());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -108,7 +109,7 @@ public class CuratorClient {
         try {
             client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path, data.getBytes());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -121,7 +122,7 @@ public class CuratorClient {
         try {
             client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(path, data.getBytes());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -142,7 +143,7 @@ public class CuratorClient {
             client.delete().forPath(path);
             return true;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -157,7 +158,7 @@ public class CuratorClient {
             stat = client.checkExists().forPath(path);
             return stat != null;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
@@ -172,17 +173,19 @@ public class CuratorClient {
             nodeCache.getListenable().addListener(listener);
             nodeCache.start();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 
     public void watchChildNodeData(String path, PathChildrenCacheListener listener) {
         try {
+            // cacheData 代表是否获取节点下面的数据
             PathChildrenCache pathChildrenCache = new PathChildrenCache(client, path, false);
             pathChildrenCache.getListenable().addListener(listener);
-            pathChildrenCache.start();
+            // 同步初始化，避免本地缓存已存在对应 provider 连接的情况下重复添加
+            pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RpcException(e);
         }
     }
 }
