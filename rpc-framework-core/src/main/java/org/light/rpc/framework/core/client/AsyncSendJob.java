@@ -19,7 +19,8 @@ public class AsyncSendJob implements Runnable {
             // 阻塞
             try {
                 final RpcRequestMessage requestMessage = CommonClientCache.SEND_QUEUE.take();
-                final ChannelFuture channelFuture = ConnectionHandler.getChannelFuture(requestMessage.getTargetServiceName());
+
+                final ChannelFuture channelFuture = ConnectionHandler.getChannelFuture(requestMessage);
                 channelFuture.channel().writeAndFlush(requestMessage)
                         // 不加监听的话消息发送异常不会打印错误信息
                         .addListener(promise -> {

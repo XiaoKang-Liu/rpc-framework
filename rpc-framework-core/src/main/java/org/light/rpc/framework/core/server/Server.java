@@ -26,7 +26,7 @@ public class Server {
 
     private RegistryService registryService;
 
-    private String port = System.getProperty("server.port");
+    private final String port = System.getProperty("server.port");
 
     public void startApplication() throws InterruptedException {
         final NioEventLoopGroup boss = new NioEventLoopGroup(1);
@@ -47,7 +47,8 @@ public class Server {
         bootstrap.bind( Integer.parseInt(System.getProperty("server.port"))).sync();
     }
     
-    public void registerService(Object serviceBean) {
+    public void registerService(ServiceWrapper serviceWrapper) {
+        final Object serviceBean = serviceWrapper.getServiceObj();
         final Class<?>[] interfaces = serviceBean.getClass().getInterfaces();
         if (interfaces.length == 0) {
             throw new RpcException("service must have interfaces!");
@@ -66,12 +67,18 @@ public class Server {
         url.setApplicationName("provider1");
         url.addParameter("ip", RpcCommonUtil.getLocalIpAddress());
         url.addParameter("port", port);
+        url.addParameter("group", serviceWrapper.getGroup());
+        url.addParameter("limit", String.valueOf(serviceWrapper.getLimit()));
         registryService.registry(url);
     }
 
     public static void main(String[] args) throws InterruptedException {
         Server server = new Server();
-        server.registerService(new UserServiceImpl());
+        final ServiceWrapper serviceWrapper = new ServiceWrapper();
+        serviceWrapper.setServiceObj(new UserServiceImpl());
+        serviceWrapper.setServiceToken("userToken");
+        serviceWrapper.setGroup("user");
+        server.registerService(serviceWrapper);
         server.startApplication();
     }
 }

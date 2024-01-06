@@ -1,7 +1,7 @@
 package org.light.rpc.framework.core.common.router.impl;
 
 import org.light.rpc.framework.core.common.ChannelFuturePollingRef;
-import org.light.rpc.framework.core.common.ChannelFutureWrapper;
+import org.light.rpc.framework.core.common.wrapper.ChannelFutureWrapper;
 import org.light.rpc.framework.core.common.router.Router;
 import org.light.rpc.framework.core.registry.URL;
 

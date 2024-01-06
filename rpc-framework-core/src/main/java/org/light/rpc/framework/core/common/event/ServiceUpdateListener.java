@@ -2,7 +2,7 @@ package org.light.rpc.framework.core.common.event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.light.rpc.framework.core.client.ConnectionHandler;
-import org.light.rpc.framework.core.common.ChannelFutureWrapper;
+import org.light.rpc.framework.core.common.wrapper.ChannelFutureWrapper;
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
 import org.light.rpc.framework.core.common.event.data.URLChangeWrapper;
 import org.light.rpc.framework.core.common.exception.RpcException;

@@ -1,11 +1,11 @@
 package org.light.rpc.framework.core.proxy;
 
-import io.netty.channel.Channel;
 import io.netty.channel.DefaultEventLoop;
 import io.netty.util.concurrent.DefaultPromise;
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
 import org.light.rpc.framework.core.common.exception.RpcException;
 import org.light.rpc.framework.core.common.message.RpcRequestMessage;
+import org.light.rpc.framework.core.common.wrapper.RpcRequestMessageWrapper;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -18,7 +18,8 @@ import java.util.UUID;
  */
 public class JdkProxyFactory {
 
-    public static  <T> T getProxy(Class<T> serviceClass) {
+    public static  <T> T getProxy(RpcRequestMessageWrapper rpcRequestMessageWrapper) {
+        final Class serviceClass = rpcRequestMessageWrapper.getServiceClass();
         final Object proxyInstance = Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class[]{serviceClass},
                 new InvocationHandler() {
                     @Override
@@ -28,6 +29,7 @@ public class JdkProxyFactory {
                         rpcRequestMessage.setTargetMethodName(method.getName());
                         rpcRequestMessage.setParameterTypes(method.getParameterTypes());
                         rpcRequestMessage.setParameterValue(args);
+                        rpcRequestMessage.setAttachments(rpcRequestMessageWrapper.getAttachments());
                         // 设置消息序号
                         final String sequenceId = UUID.randomUUID().toString();
                         rpcRequestMessage.setSequenceId(sequenceId);

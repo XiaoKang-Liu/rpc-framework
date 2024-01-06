@@ -1,5 +1,7 @@
 package org.light.rpc.framework.core.common.message;
 
+import java.util.Map;
+
 /**
  * RPC 请求报文
  * @author lxk
@@ -26,6 +28,19 @@ public class RpcRequestMessage extends AbstractMessage {
      * 方法参数值
      */
     private Object[] parameterValue;
+
+    /**
+     * 过滤器参数
+     */
+    private Map<String, Object> attachments;
+
+    public Map<String, Object> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(Map<String, Object> attachments) {
+        this.attachments = attachments;
+    }
 
     public String getTargetServiceName() {
         return targetServiceName;

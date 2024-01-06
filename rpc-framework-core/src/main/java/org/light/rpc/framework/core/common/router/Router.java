@@ -1,6 +1,6 @@
 package org.light.rpc.framework.core.common.router;
 
-import org.light.rpc.framework.core.common.ChannelFutureWrapper;
+import org.light.rpc.framework.core.common.wrapper.ChannelFutureWrapper;
 import org.light.rpc.framework.core.registry.URL;
 
 /**

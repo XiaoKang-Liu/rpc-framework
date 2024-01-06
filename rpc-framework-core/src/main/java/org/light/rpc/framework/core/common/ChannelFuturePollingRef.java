@@ -1,6 +1,7 @@
 package org.light.rpc.framework.core.common;
 
 import org.light.rpc.framework.core.common.cache.CommonClientCache;
+import org.light.rpc.framework.core.common.wrapper.ChannelFutureWrapper;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

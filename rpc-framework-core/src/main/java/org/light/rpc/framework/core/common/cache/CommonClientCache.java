@@ -1,8 +1,9 @@
 package org.light.rpc.framework.core.common.cache;
 
 import io.netty.util.concurrent.Promise;
-import org.light.rpc.framework.core.common.ChannelFutureWrapper;
+import org.light.rpc.framework.core.common.wrapper.ChannelFutureWrapper;
 import org.light.rpc.framework.core.common.message.RpcRequestMessage;
+import org.light.rpc.framework.core.filter.impl.client.ClientFilterChain;
 import org.light.rpc.framework.core.registry.URL;
 
 import java.util.*;
@@ -35,7 +36,7 @@ public class CommonClientCache {
      */
     public static final List<String> SUBSCRIBE_SERVICE_LIST = new ArrayList<>();
 
-    public static final Map<String, List<URL>> URL_MAP = new ConcurrentHashMap<>();
+    public static final Map<String, Map<String, String>> URL_MAP = new ConcurrentHashMap<>();
 
     /**
      *
@@ -49,4 +50,9 @@ public class CommonClientCache {
 
 
     public static final Map<String, ChannelFutureWrapper[]> SERVICE_ROUTE_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 客户端过滤器链
+     */
+    public static ClientFilterChain CLIENT_FILTER_CHAIN;
 }

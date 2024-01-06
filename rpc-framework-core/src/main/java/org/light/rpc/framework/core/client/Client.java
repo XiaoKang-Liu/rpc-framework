@@ -13,6 +13,7 @@ import org.light.rpc.framework.core.common.event.RpcListenerLoader;
 import org.light.rpc.framework.core.common.handler.RpcResponseMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
 import org.light.rpc.framework.core.common.util.RpcCommonUtil;
+import org.light.rpc.framework.core.common.wrapper.RpcRequestMessageWrapper;
 import org.light.rpc.framework.core.proxy.JdkProxyFactory;
 import org.light.rpc.framework.core.registry.URL;
 import org.light.rpc.framework.core.registry.zookeeper.AbstractRegister;
@@ -105,7 +106,11 @@ public class Client {
         client.setClientConfig(clientConfig);
         final Bootstrap bootstrap = client.initClientApplication();
         ConnectionHandler.setBootstrap(bootstrap);
-        final UserService proxy = JdkProxyFactory.getProxy(UserService.class);
+        // 请求包装
+        RpcRequestMessageWrapper<UserService> requestMessageWrapper = new RpcRequestMessageWrapper<>();
+        requestMessageWrapper.setServiceClass(UserService.class);
+        requestMessageWrapper.setGroup("dev");
+        final UserService proxy = JdkProxyFactory.getProxy(requestMessageWrapper);
         client.doSubscribeService(UserService.class);
         client.doConnectServer();
         client.startClient();
