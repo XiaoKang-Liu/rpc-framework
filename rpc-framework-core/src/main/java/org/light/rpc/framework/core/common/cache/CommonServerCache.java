@@ -1,5 +1,6 @@
 package org.light.rpc.framework.core.common.cache;
 
+import org.light.rpc.framework.core.dispatcher.ServerChannelDispatcher;
 import org.light.rpc.framework.core.filter.impl.server.ServerFilterChain;
 import org.light.rpc.framework.core.registry.URL;
 
@@ -32,4 +33,6 @@ public class CommonServerCache {
      * 服务端过滤器链
      */
     public static ServerFilterChain SERVER_FILTER_CHAIN;
+
+    public static final ServerChannelDispatcher DISPATCHER = new ServerChannelDispatcher();
 }

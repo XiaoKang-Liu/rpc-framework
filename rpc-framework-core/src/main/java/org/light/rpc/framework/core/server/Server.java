@@ -12,6 +12,7 @@ import org.light.rpc.framework.core.common.cache.CommonServerCache;
 import org.light.rpc.framework.core.common.exception.RpcException;
 import org.light.rpc.framework.core.common.handler.RpcRequestMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
+import org.light.rpc.framework.core.common.protocol.RpcMessageFrameDecoder;
 import org.light.rpc.framework.core.common.util.RpcCommonUtil;
 import org.light.rpc.framework.core.registry.RegistryService;
 import org.light.rpc.framework.core.registry.URL;
@@ -39,6 +40,7 @@ public class Server {
         bootstrap.childHandler(new ChannelInitializer<NioSocketChannel>() {
             @Override
             protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
+                nioSocketChannel.pipeline().addLast(new RpcMessageFrameDecoder());
                 nioSocketChannel.pipeline().addLast(rpcMessageCodec);
                 nioSocketChannel.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
                 nioSocketChannel.pipeline().addLast(rpcRequestMessageHandler);
@@ -79,6 +81,8 @@ public class Server {
         serviceWrapper.setServiceToken("userToken");
         serviceWrapper.setGroup("user");
         server.registerService(serviceWrapper);
+
+        CommonServerCache.DISPATCHER.init(100, 5);
         server.startApplication();
     }
 }

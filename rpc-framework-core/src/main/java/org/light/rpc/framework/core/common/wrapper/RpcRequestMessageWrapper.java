@@ -15,8 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 public class RpcRequestMessageWrapper<T> {
 
-    private RpcRequestMessage rpcRequestMessage;
-
     private Class<T> serviceClass;
 
     private Map<String, Object> attachments = new ConcurrentHashMap<>();

@@ -6,10 +6,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.light.rpc.framework.core.common.cache.CommonServerCache;
 import org.light.rpc.framework.core.common.message.RpcRequestMessage;
-import org.light.rpc.framework.core.common.message.RpcResponseMessage;
+import org.light.rpc.framework.core.server.ServerChannelDispatchData;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * @author lxk
@@ -20,15 +19,11 @@ public class RpcRequestMessageHandler extends SimpleChannelInboundHandler<RpcReq
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, RpcRequestMessage rpcRequestMessage) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        RpcResponseMessage responseMessage = new RpcResponseMessage();
-        responseMessage.setSequenceId(rpcRequestMessage.getSequenceId());
-        final String targetServiceName = rpcRequestMessage.getTargetServiceName();
-        final Object targetService = CommonServerCache.PROVIDER_CLASS_MAP.get(targetServiceName);
-        final Method method;
-        method = targetService.getClass().getDeclaredMethod(rpcRequestMessage.getTargetMethodName(), rpcRequestMessage.getParameterTypes());
-        final Object invoke = method.invoke(targetService, rpcRequestMessage.getParameterValue());
-        responseMessage.setReturnValue(invoke);
-        channelHandlerContext.writeAndFlush(responseMessage);
+        final ServerChannelDispatchData serverChannelDispatchData = new ServerChannelDispatchData();
+        serverChannelDispatchData.setRpcRequestMessage(rpcRequestMessage);
+        serverChannelDispatchData.setChannelHandlerContext(channelHandlerContext);
+        // 消息分发
+        CommonServerCache.DISPATCHER.add(serverChannelDispatchData);
     }
 
     @Override

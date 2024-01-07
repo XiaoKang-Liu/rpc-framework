@@ -12,6 +12,7 @@ import org.light.rpc.framework.core.common.config.ClientConfig;
 import org.light.rpc.framework.core.common.event.RpcListenerLoader;
 import org.light.rpc.framework.core.common.handler.RpcResponseMessageHandler;
 import org.light.rpc.framework.core.common.protocol.RpcMessageCodec;
+import org.light.rpc.framework.core.common.protocol.RpcMessageFrameDecoder;
 import org.light.rpc.framework.core.common.util.RpcCommonUtil;
 import org.light.rpc.framework.core.common.wrapper.RpcRequestMessageWrapper;
 import org.light.rpc.framework.core.proxy.JdkProxyFactory;
@@ -53,8 +54,9 @@ public class Client {
                 .handler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
                     protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
-                        nioSocketChannel.pipeline().addLast(rpcMessageCodec);
                         nioSocketChannel.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
+                        nioSocketChannel.pipeline().addLast(new RpcMessageFrameDecoder());
+                        nioSocketChannel.pipeline().addLast(rpcMessageCodec);
                         nioSocketChannel.pipeline().addLast(rpcResponseMessageHandler);
                     }
                 });

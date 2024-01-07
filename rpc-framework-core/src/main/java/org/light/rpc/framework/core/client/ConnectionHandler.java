@@ -43,20 +43,21 @@ public class ConnectionHandler {
         final String[] addr = providerAddr.split(":");
         final String ip = addr[0];
         final int port = Integer.parseInt(addr[1]);
-        // 从注册中心获取额外信息
-        final String providerURLInfo = CommonClientCache.URL_MAP.get(providerServiceName).get(providerAddr);
-        final ProviderNodeInfo providerNodeInfo = URL.buildUrlFromUrlStr(providerURLInfo);
-        doConnect(providerServiceName, ip, port, providerNodeInfo);
+        doConnect(providerServiceName, ip, port);
     }
 
-    public static void doConnect(String providerServiceName, String ip, Integer port, ProviderNodeInfo providerNodeInfo) throws InterruptedException {
+    public static void doConnect(String providerServiceName, String ip, Integer port) throws InterruptedException {
+        // 从注册中心获取额外信息
+//        final String providerURLInfo = CommonClientCache.URL_MAP.get(providerServiceName).get(providerAddr);
+//        final ProviderNodeInfo providerNodeInfo = URL.buildUrlFromUrlStr(providerURLInfo);
+
         final ChannelFuture channelFuture = bootstrap.connect(new InetSocketAddress(ip, port)).sync();
         final ChannelFutureWrapper channelFutureWrapper = new ChannelFutureWrapper();
         channelFutureWrapper.setChannelFuture(channelFuture);
         channelFutureWrapper.setIp(ip);
         channelFutureWrapper.setPort(port);
-        channelFutureWrapper.setGroup(providerNodeInfo.getGroup());
-        channelFutureWrapper.setWeight(providerNodeInfo.getWeight());
+//        channelFutureWrapper.setGroup(providerNodeInfo.getGroup());
+//        channelFutureWrapper.setWeight(providerNodeInfo.getWeight());
         // 加入本地缓存
         CommonClientCache.SERVER_ADDRESS.add(ip + ":" + port);
         List<ChannelFutureWrapper> channelFutureWrappers = CommonClientCache.CONNECT_MAP.get(providerServiceName);
@@ -92,7 +93,7 @@ public class ConnectionHandler {
                     providerServiceName);
         }
         // 过滤器链筛选
-        CommonClientCache.CLIENT_FILTER_CHAIN.doFilter(channelFutureWrappers, requestMessage.getAttachments());
+//        CommonClientCache.CLIENT_FILTER_CHAIN.doFilter(channelFutureWrappers, requestMessage.getAttachments());
         return channelFutureWrappers.get(new
                 Random().nextInt(channelFutureWrappers.size())).getChannelFuture();
     }
