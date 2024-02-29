@@ -1,5 +1,4 @@
 # rpc-framework
-# RPC 项目介绍
 
 一款基于 Netty和 Zookeeper 的轻量 `RPC` 框架。整体设计如下：
 
